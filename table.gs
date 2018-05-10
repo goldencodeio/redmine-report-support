@@ -3,18 +3,29 @@ function writeTable() {
   writeUserRows();
 }
 
+function sheetСlear() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  sheet.clear();
+}
+
 function writeHeader() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  sheet.getRange(1, 1).setValue('Исполнитель');
-  sheet.getRange(1, 2).setValue('Рабочее время');
-  sheet.getRange(1, 3).setValue('% Списанного времени');  
-  sheet.getRange(1, 4).setValue('Всего задач');    
-  sheet.getRange(1, 5).setValue('Выполнено'); 
-  sheet.getRange(1, 6).setValue('Критических'); 
-  sheet.getRange(1, 7).setValue('Просроченных'); 
-  sheet.getRange(1, 8).setValue('Неотписано'); 
-  sheet.getRange(1, 9).setValue('Забыто'); 
-  sheet.getRange(1, 10).setValue('Претензий'); 
-  sheet.getRange(1, 11).setValue('Опозданий'); 
-  sheet.getRange(1, 12).setValue('Вранья'); 
+  var rangeBgColor = '#fff2cc';
+  sheet.setName('Итог Месяц').setTabColor('#ffd966');
+  var columnI = 1;
+  REPORT.forEach(function(k) {
+    sheet.getRange(1, columnI++).setValue(k.name).setBackground(rangeBgColor);
+  });
+}
+
+function writeUserRows() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var rangeBgColor = '#fff2cc';
+  var rowI = 2;
+  users = OPTIONS.users;
+  users.forEach(function(user, i) {
+    var userData = APIRequest('users', {query: [{key: 'name', value: user}]}).users[0];
+    sheet.getRange(rowI++, 1).setValue(userData.firstname + ' ' + userData.lastname).setBackground(rangeBgColor);
+    OPTIONS.users[i] = userData;
+  });
 }
