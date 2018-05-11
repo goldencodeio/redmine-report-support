@@ -18,10 +18,10 @@ function initOptions() {
   if (!Array.isArray(OPTIONS.performers)) OPTIONS.performers = [OPTIONS.performers];
   if (!Array.isArray(OPTIONS.attendants)) OPTIONS.attendants = [OPTIONS.attendants];
 
-  var sheetName = OPTIONS.datesRange.map(formatDate).join(' : ');
-  var existingSheet = _ss.getSheetByName(sheetName);
+//  var sheetName = OPTIONS.datesRange.map(formatDate).join(' : ');
+  var existingSheet = _ss.getSheetByName('Итог Месяц');
   if (existingSheet) _ss.deleteSheet(existingSheet);
-  _ss.insertSheet(sheetName);
+  _ss.insertSheet('Итог Месяц').setTabColor('#cfe2f3').setColumnWidth(1, 200).setColumnWidth(3, 150);
 }
 
 function getOptionsSheet() {

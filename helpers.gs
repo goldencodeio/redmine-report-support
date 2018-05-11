@@ -2,8 +2,8 @@ function formatDate(date) {
   return date.toJSON().split('T').shift();
 }
 
-function getDateRage() {
-  return '><' + formatDate(OPTIONS.datesRange[0]) + '|' + formatDate(OPTIONS.datesRange[1]);
+function getDateRage(startDate, finalDate) {
+  return '><' + formatDate(startDate) + '|' + formatDate(finalDate);
 }
 
 if (!Array.prototype.find) {

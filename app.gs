@@ -1,7 +1,7 @@
 function main() {  
   initOptions();
-  processReports();
-  writeTable();
+  initTable();
+  processReports();  
 }
 
 function onOpen() {
