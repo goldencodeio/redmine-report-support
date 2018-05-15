@@ -11,17 +11,43 @@ function initOptions() {
     row = row.filter(function(a) {return a});
     OPTIONS[key] = row.length > 1 ? row : row[0];
   });
-  
-  OPTIONS.startDate.setHours(OPTIONS.startDate.getHours() - 1 * OPTIONS.startDate.getTimezoneOffset() / 60);  
-  OPTIONS.finalDate.setHours(OPTIONS.finalDate.getHours() - 1 * OPTIONS.finalDate.getTimezoneOffset() / 60);      
-  
+
+  OPTIONS.startDate.setHours(OPTIONS.startDate.getHours() - 1 * OPTIONS.startDate.getTimezoneOffset() / 60);
+  OPTIONS.finalDate.setHours(OPTIONS.finalDate.getHours() - 1 * OPTIONS.finalDate.getTimezoneOffset() / 60);
+
   if (!Array.isArray(OPTIONS.performers)) OPTIONS.performers = [OPTIONS.performers];
   if (!Array.isArray(OPTIONS.attendants)) OPTIONS.attendants = [OPTIONS.attendants];
 
-//  var sheetName = OPTIONS.datesRange.map(formatDate).join(' : ');
-  var existingSheet = _ss.getSheetByName('Итог Месяц');
-  if (existingSheet) _ss.deleteSheet(existingSheet);
-  _ss.insertSheet('Итог Месяц').setTabColor('#cfe2f3').setColumnWidth(1, 200).setColumnWidth(3, 150);
+  OPTIONS.currentDate = OPTIONS.startDate;
+  var startSheetName = formatDate(OPTIONS.currentDate);
+  var existingStartSheet = _ss.getSheetByName(startSheetName);
+  if (existingStartSheet) {
+    var tDate = new Date(OPTIONS.currentDate.getTime());
+    tDate.setDate(tDate.getDate() + 1);
+    while ( tDate.getTime() <= OPTIONS.finalDate.getTime() ) {
+      if (_ss.getSheetByName(formatDate(tDate))) {
+        tDate.setDate(tDate.getDate() + 1);
+        if (tDate.getTime() > OPTIONS.finalDate.getTime()) {
+          OPTIONS.currentDate = new Date(tDate.getTime());
+          break;
+        }
+        continue;
+      }
+      OPTIONS.currentDate = new Date(tDate.getTime());
+      break;
+    }
+    if (tDate.getTime() <= OPTIONS.finalDate.getTime()) {
+      tDate.setDate(tDate.getDate() -1);
+      var prevSheet = _ss.getSheetByName(formatDate(tDate)).activate();
+      var isRangesEmpty = false;
+      var namedRanges = prevSheet.getNamedRanges();
+      for (var i = 0; i < namedRanges.length; i++) {
+        if (namedRanges[i].getRange().getValue() === '') isRangesEmpty = true;
+      }
+      if (!isRangesEmpty) createNewSheet(formatDate(OPTIONS.currentDate));
+      else OPTIONS.currentDate = new Date(tDate.getTime());
+    }
+  } else createNewSheet(startSheetName);
 }
 
 function getOptionsSheet() {
@@ -31,4 +57,9 @@ function getOptionsSheet() {
       return sheets[i];
   }
   return null;
+}
+
+function createNewSheet(name) {
+  var _ss = SpreadsheetApp.getActiveSpreadsheet();
+  _ss.insertSheet(name).setTabColor('#6d9eeb').setColumnWidth(1, 200).setColumnWidth(3, 150).activate();
 }
