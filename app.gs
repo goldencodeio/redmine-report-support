@@ -1,12 +1,19 @@
-function main() {  
+function createDailyReport() {
   initOptions();
   initTable();
-  processReports();  
+  processReports();
+}
+
+function createWeeklyReport() {
+  initWeeklyOptions();
+  initWeeklyTable();
+//  processWeeklyReports();
 }
 
 function onOpen() {
   var spreadsheet = SpreadsheetApp.getActive();
   spreadsheet.addMenu('GoldenCode Report', [
-    {name: 'Создать Отчёт', functionName: 'main'}
+    {name: 'Создать Ежедневный Отчёт', functionName: 'createDailyReport'},
+    {name: 'Создать Еженедельный Отчёт', functionName: 'createWeeklyReport'}
   ]);
 }
