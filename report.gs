@@ -56,7 +56,7 @@ var REPORT = [
   }
 ];
 
-function processReports() {  
+function processReports() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getActiveSheet();
   var rowI = 2;
@@ -183,6 +183,14 @@ function getCountCriticalTasks(user) {
     {key: 'priority_id', value: '5'},
     {key: 'created_on', value: formatDate(OPTIONS.currentDate)}
   ]});
+
+  var res1 = APIRequest('issues', {query: [
+    {key: 'assigned_to_id', value: user.id},
+    {key: 'priority_id', value: '4'},
+    {key: 'created_on', value: formatDate(OPTIONS.currentDate)}
+  ]});
+
+  res.issues.concat(res1.issues);
   return res.issues.length;
 }
 
@@ -194,7 +202,7 @@ function getOverdueTasks(user) {
   ]});
 
   return res.issues.reduce(function(a, c) {
-    if (c.due_date && Date.parse(c.due_date) < OPTIONS.startDate.getTime()) return a + 1;
+    if (c.due_date && Date.parse(c.due_date) < OPTIONS.currentDate.getTime()) return a + 1;
     else return a
   }, 0);
 }
