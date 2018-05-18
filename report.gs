@@ -56,8 +56,7 @@ var REPORT = [
   }
 ];
 
-function processReports() {
-  if (OPTIONS.currentDate.getTime() > OPTIONS.finalDate.getTime()) return;
+function processReports() {  
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getActiveSheet();
   var rowI = 2;

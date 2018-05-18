@@ -1,13 +1,11 @@
 function createDailyReport() {
-  initOptions();
-  initTable();
-  processReports();
+  initOptions();  
 }
 
 function createWeeklyReport() {
   initWeeklyOptions();
   initWeeklyTable();
-//  processWeeklyReports();
+  processWeeklyReports();
 }
 
 function onOpen() {
