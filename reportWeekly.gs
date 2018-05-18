@@ -57,17 +57,18 @@ var REPORT = [
 ];
 
 function processWeeklyReports() {
-  var allSheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetWeekly = ss.getActiveSheet();
+  var allSheets = ss.getSheets();
   var dailySheets = [];
   var performers = [];
   var attendants = [];
 
   allSheets.forEach(function(sheet, i) {
-    if (sheet.getName() === formatDate(OPTIONS.startDate)) {
-      dailySheets.push(sheet);
-      for (var j = 1; j < 7; j++) {
-        if (allSheets[i + j]) dailySheets.push(allSheets[i + j]);
-      }
+    var tDate = new Date(OPTIONS.startDate.getTime());
+    while (tDate.getTime() <= OPTIONS.finalDate.getTime()) {
+      if (sheet.getName() === formatDate(tDate)) dailySheets.push(sheet);
+      tDate.setDate(tDate.getDate() + 1);
     }
   });
 
@@ -79,11 +80,19 @@ function processWeeklyReports() {
         login = login.match(/\d{4}/);
         if (!login) return;
         login = login[0];
+
         OPTIONS.performers.forEach(function(user, iUser) {
-          if (user == login) performers[iUser][iSheet] = row;
+          // Browser.msgBox(user + ' | ' + login);
+          if (user == login){
+            if (performers[iUser] === undefined) performers[iUser] = [];
+            performers[iUser].push(row);
+          }
         });
         OPTIONS.attendants.forEach(function(user, iUser) {
-          if (user == login) attendants[iUser][iSheet] = row;
+          if (user == login){
+            if (attendants[iUser] === undefined) attendants[iUser] = [];
+            attendants[iUser].push(row);
+          }
         });
       });
     });
@@ -93,10 +102,43 @@ function processWeeklyReports() {
     var arrSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     arrSum.forEach(function(sum, i) {
       user.forEach(function(row) {
-          arrSum[i] += row[i];
+          arrSum[i] += parseFloat(row[i]);
       });
     });
     arrSum[1] = arrSum[1] / user[0].length;
     return arrSum;
+  });
+
+  attendants = attendants.map(function(user) {
+    var arrSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    arrSum.forEach(function(sum, i) {
+      user.forEach(function(row) {
+          arrSum[i] += parseFloat(row[i]);
+      });
+    });
+    arrSum[1] = arrSum[1] / user[0].length;
+    return arrSum;
+  });
+
+  // print
+
+  var rowI = 2;
+  var columnI = 2;
+  performers.forEach(function(user) {
+    user.forEach(function(value) {
+      sheetWeekly.getRange(rowI, columnI++).setValue(value);
+    });
+    columnI = 2;
+    rowI++;
+  });
+
+  rowI += 2;
+
+  attendants.forEach(function(user) {
+    user.forEach(function(value) {
+      sheetWeekly.getRange(rowI, columnI++).setValue(value);
+    });
+    columnI = 2;
+    rowI++;
   });
 }

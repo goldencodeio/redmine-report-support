@@ -6,6 +6,7 @@ function initWeeklyOptions() {
   getOptionsData();
 
   var sheetName = formatDate(OPTIONS.startDate) + ' : ' + formatDate(OPTIONS.finalDate);
-  OPTIONS.weeklySheet = _ss.getSheetByName(sheetName);
-  if (!OPTIONS.sheetWeekly) OPTIONS.weeklySheet = createNewSheet(sheetName, '#93c47d');
+  var existingSheet = _ss.getSheetByName(sheetName);
+  if (existingSheet) _ss.deleteSheet(existingSheet);
+  createNewSheet(sheetName, '#93c47d');
 }

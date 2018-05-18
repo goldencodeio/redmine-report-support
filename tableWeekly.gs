@@ -20,7 +20,6 @@ function writeWeeklyUserRows() {
   performers.forEach(function(user, i) {
     var userData = APIRequest('users', {query: [{key: 'name', value: user}]}).users[0];
     sheet.getRange(rowI++, 1).setValue(userData.firstname + ' ' + userData.lastname + ' (' + userData.login + ')').setBackground(rangeBgColor);
-    OPTIONS.performers[i] = userData;
   });
 
   attendants = OPTIONS.attendants;
@@ -29,6 +28,5 @@ function writeWeeklyUserRows() {
   attendants.forEach(function(user, i) {
     var userData = APIRequest('users', {query: [{key: 'name', value: user}]}).users[0];
     sheet.getRange(rowI++, 1).setValue(userData.firstname + ' ' + userData.lastname + ' (' + userData.login + ')').setBackground(rangeBgColor);
-    OPTIONS.attendants[i] = userData;
   });
 }
