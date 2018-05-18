@@ -1,62 +1,4 @@
-var REPORT = [
-  {
-    code: 'work_time',
-    name: 'Рабочее время',
-    manual: false
-  },
-  {
-    code: 'written_time',
-    name: '% Списанного времени',
-    manual: false
-  },
-  {
-    code: 'total_tasks',
-    name: 'Всего задач',
-    manual: false
-  },
-  {
-    code: 'done_tasks',
-    name: 'Выполнено',
-    manual: false
-  },
-  {
-    code: 'critical_tasks',
-    name: 'Критических',
-    manual: false
-  },
- {
-   code: 'overdue_tasks',
-   name: 'Просроченных',
-   manual: false
- },
-  {
-    code: 'unsubscribed',
-    name: 'Неотписано',
-    manual: false
-  },
-  {
-    code: 'forgotten',
-    name: 'Забыто',
-    manual: true
-  },
- {
-   code: 'claims',
-   name: 'Претензий',
-   manual: false
- },
-  {
-    code: 'delays',
-    name: 'Опозданий',
-    manual: true
-  },
-  {
-    code: 'lies',
-    name: 'Вранья',
-    manual: true
-  }
-];
-
-function processWeeklyReports() {
+function processPeriodReports() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheetWeekly = ss.getActiveSheet();
   var allSheets = ss.getSheets();
@@ -105,7 +47,7 @@ function processWeeklyReports() {
           arrSum[i] += parseFloat(row[i]);
       });
     });
-    arrSum[1] = arrSum[1] / user[0].length;
+    arrSum[1] = arrSum[1] / user.length;
     return arrSum;
   });
 
@@ -116,7 +58,7 @@ function processWeeklyReports() {
           arrSum[i] += parseFloat(row[i]);
       });
     });
-    arrSum[1] = arrSum[1] / user[0].length;
+    arrSum[1] = arrSum[1] / user.length;
     return arrSum;
   });
 
