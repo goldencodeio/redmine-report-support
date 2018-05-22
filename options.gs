@@ -73,6 +73,19 @@ function getOptionsData() {
 
   if (!Array.isArray(OPTIONS.performers)) OPTIONS.performers = [OPTIONS.performers];
   if (!Array.isArray(OPTIONS.attendants)) OPTIONS.attendants = [OPTIONS.attendants];
+  if (!Array.isArray(OPTIONS.performersWorkHours)) OPTIONS.performersWorkHours = [OPTIONS.performersWorkHours];
+  if (!Array.isArray(OPTIONS.attendantsStartDate)) OPTIONS.attendantsStartDate = [OPTIONS.attendantsStartDate];
+  if (!Array.isArray(OPTIONS.attendantsFinalDate)) OPTIONS.attendantsFinalDate = [OPTIONS.attendantsFinalDate];
+
+  OPTIONS.attendantsStartDate.map(function(date) {
+    date.setHours(date.getHours() - 1 * date.getTimezoneOffset() / 60);
+    return date;
+  });
+
+  OPTIONS.attendantsFinalDate.map(function(date) {
+    date.setHours(date.getHours() - 1 * date.getTimezoneOffset() / 60);
+    return date;
+  });
 }
 
 function getOptionsSheet() {

@@ -6,6 +6,16 @@ function getDateRage(startDate, finalDate) {
   return '><' + formatDate(startDate) + '|' + formatDate(finalDate);
 }
 
+function getDateRangeWithTime(startDate, finalDate) {
+  var startDate = startDate.toJSON().split('.').shift() + 'Z';
+  var finalDate = finalDate.toJSON().split('.').shift() + 'Z';  
+  return '><' + startDate + '|' + finalDate;
+}
+
+function getHoursByRange(startDate, finalDate) {
+  return (finalDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+}
+
 if (!Array.prototype.find) {
   Array.prototype.find = function(predicate) {
     if (this == null) {

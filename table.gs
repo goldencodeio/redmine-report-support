@@ -35,10 +35,13 @@ function writeUserRows() {
   });
 
   rowI+=2;
-  sheet.getRange(rowI, 7).setValue('Ответственный').setFontWeight('bold');
+  sheet.getRange(rowI, 1, 1, sheet.getLastColumn()).setBackground('#ea9999');
+  sheet.getRange(rowI, 1).setValue('Итого').setFontWeight('bold');
+  sheet.getRange(rowI, 2).setValue(formatDate(OPTIONS.startDate));
+  sheet.getRange(rowI+=2, 7).setValue('Ответственный').setFontWeight('bold');
   sheet.getRange(rowI, 8).setValue('Утверждает').setFontWeight('bold');
   sheet.getRange(rowI++, 9).setValue('Оценка').setFontWeight('bold');
   sheet.getRange(rowI, 7).setValue(OPTIONS.daily[0]);
   sheet.getRange(rowI, 8).setValue(OPTIONS.daily[1]);
-  ss.setNamedRange('manualRange' + rowI + 9, sheet.getRange(sheet.getRange(rowI, 9).getA1Notation()));  
+  ss.setNamedRange('manualRange' + rowI + 9, sheet.getRange(sheet.getRange(rowI, 9).getA1Notation()));
 }

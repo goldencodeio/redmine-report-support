@@ -41,24 +41,36 @@ function processPeriodReports() {
   }
 
   performers = performers.map(function(user) {
-    var arrSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var arrSum = [];
+    for (var i = 0; i < user[0].length; i++) {
+      arrSum.push(0);
+    }
+
     arrSum.forEach(function(sum, i) {
       user.forEach(function(row) {
           arrSum[i] += parseFloat(row[i]);
       });
     });
     arrSum[1] = arrSum[1] / user.length;
+    arrSum[9] = arrSum[9] / user.length;
+    arrSum[10] = arrSum[10] / user.length;
     return arrSum;
   });
 
   attendants = attendants.map(function(user) {
-    var arrSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var arrSum = [];
+    for (var i = 0; i < user[0].length; i++) {
+      arrSum.push(0);
+    }
+
     arrSum.forEach(function(sum, i) {
       user.forEach(function(row) {
           arrSum[i] += parseFloat(row[i]);
       });
     });
     arrSum[1] = arrSum[1] / user.length;
+    arrSum[9] = arrSum[9] / user.length;
+    arrSum[10] = arrSum[10] / user.length;
     return arrSum;
   });
 
