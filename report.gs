@@ -1,37 +1,37 @@
 var REPORT = [
   {
     code: 'work_time',
-    name: 'Рабочее время',
+    name: 'Рабочее\nвремя',
     manual: false
   },
   {
     code: 'written_time',
-    name: '% Списанного времени',
+    name: '% Списанного\nвремени',
     manual: false
   },
   {
     code: 'total_tasks',
-    name: 'Всего задач',
+    name: 'Всего\nзадач',
     manual: false
   },
   {
     code: 'done_tasks',
-    name: 'Выполнено',
+    name: 'Выполнено/\nОценено',
     manual: false
   },
   {
     code: 'critical_tasks',
-    name: 'Критических/Выполнено',
+    name: 'Критических/\nОценено',
     manual: false
   },
  {
    code: 'overdue_tasks',
-   name: 'Просроченных/Выполнено',
+   name: 'Просроченных/\nОценено',
    manual: false
  },
  {
    code: 'paid_separately',
-   name: 'Оплачивается отдельно',
+   name: 'Оплачивается\nотдельно',
    manual: false
  },
   {
@@ -46,12 +46,12 @@ var REPORT = [
  },
  {
    code: 'client_rating_avg',
-   name: 'Ср. Оценка заявителя',
+   name: 'Ср. Оценка\nзаявителя',
    manual: false
  },
  {
    code: 'boss_rating_avg',
-   name: 'Ср. Оценка ведения задачи',
+   name: 'Ср. Оценка\nведения задачи',
    manual: false
  },
  {
@@ -61,12 +61,12 @@ var REPORT = [
  },
   {
     code: 'delays',
-    name: 'Опозданий (мин)',
+    name: 'Опозданий\n(мин)',
     manual: true
   },
   {
     code: 'overtime_spent',
-    name: 'Переработок (мин)',
+    name: 'Переработок\n(мин)',
     manual: true
   },
   {
@@ -91,7 +91,7 @@ function processReports() {
         if ((Array.isArray(reportValue))) {
           var listUrl = '';
           reportValue.forEach(function(task) {
-            listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\r\n';
+            listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
           });
           sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
         } else {
@@ -119,7 +119,7 @@ function processReports() {
         if ((Array.isArray(reportValue))) {
           var listUrl = '';
           reportValue.forEach(function(task) {
-            listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\r\n';
+            listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
           });
           sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
         } else {
@@ -212,19 +212,70 @@ function getCountTotalTasks(user, i, userType) {
   var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
   var res = APIRequest('issues', {query: [
     {key: 'assigned_to_id', value: user.id},
+    {key: 'status_id', value: '*'},
     {key: 'created_on', value: date}
   ]});
   return res.issues;
 }
 
-function getCountDoneTasks(user, i, userType) {
-  var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
+function getCountDoneTasks(user, userIndex, userType) {
+  // if (userType === 'attendants') {
+  //     var filterStartDate = formatDate(OPTIONS.attendantsStartDate[userIndex]);
+  //     var filterFinalDate = formatDate(OPTIONS.attendantsFinalDate[userIndex]);
+  // } else {
+  //     var filterStartDate = formatDate(OPTIONS.currentDate);
+  //     var filterFinalDate = formatDate(OPTIONS.currentDate);
+  // }
+  var filterDate = (userType === 'attendants') ? formatDate(OPTIONS.attendantsStartDate[userIndex]) : formatDate(OPTIONS.currentDate);
   var res = APIRequest('issues', {query: [
     {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: date}
+    {key: 'status_id', value: '*'},
+    {key: 'created_on', value: '<=' + filterDate},
+    {key: 'updated_on', value: '>=' + filterDate}
   ]});
-  return res.issues;
+  Logger.log(res.issues.length);
+  var filteredIssues = res.issues.filter(function(task) {
+    var resDetail = APIRequestIssueById(task.id, {query: [
+      {key: 'include', value: 'journals'}
+    ]});
+    for (var j = 0; j < resDetail.issue.journals.length; j++) {
+      var journal = resDetail.issue.journals[j];
+      if (userType === 'attendants') {
+        if (Date.parse(journal.created_on) > OPTIONS.attendantsStartDate[userIndex].getTime() && Date.parse(journal.created_on) < OPTIONS.attendantsFinalDate[userIndex].getTime()) {
+          for (var d = 0; d < journal.details.length; d++) {
+            var detail = journal.details[d];
+            if (detail.name === 'status_id' && detail.new_value === '3') return true;
+          }
+        }
+      } else {
+        var journalCreateDate = journal.created_on.split('T').shift();
+        if (journalCreateDate === formatDate(OPTIONS.currentDate)) {
+          for (var d = 0; d < journal.details.length; d++) {
+            var detail = journal.details[d];
+            if (detail.name === 'status_id' && detail.new_value === '3') return true;
+          }
+        }
+      }
+    }
+    // resDetail.issue.journals.forEach(function(journal) {
+    //   if (userType === 'attendants') {
+    //     if (Date.parse(journal.created_on) > OPTIONS.attendantsStartDate[userIndex].getTime() && Date.parse(journal.created_on) < OPTIONS.attendantsFinalDate[userIndex].getTime()) {
+    //       journal.details.forEach(function(detail) {
+    //         if (detail.name === 'status_id' && detail.new_value === '3') return true;
+    //       });
+    //     }
+    //   } else {
+    //     var journalCreateDate = journal.created_on.split('T').shift();
+    //     if (journalCreateDate === formatDate(OPTIONS.currentDate)) {
+    //       journal.details.forEach(function(detail) {
+    //         if (detail.name === 'status_id' && detail.new_value === '3') return true;
+    //       });
+    //     }
+    //   }
+    // });
+    return false;
+  });
+  return filteredIssues;
 }
 
 function getCountCriticalTasks(user, i, userType) {
@@ -303,6 +354,7 @@ function getClaims(user, i, userType) {
   var res = APIRequest('issues', {query: [
     {key: 'tracker_id', value: 5},
     {key: 'assigned_to_id', value: user.id},
+    {key: 'status_id', value: '*'},
     {key: 'created_on', value: date}
   ]});
   return res.issues;

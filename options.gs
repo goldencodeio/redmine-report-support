@@ -52,7 +52,7 @@ function initOptions() {
       createNewSheet(sheetName, '#6d9eeb');
       initTable();
       processReports();
-    }
+    } else Browser.msgBox('Не заполнены ручные поля за предыдущий день');
   }
 }
 
@@ -99,5 +99,5 @@ function getOptionsSheet() {
 
 function createNewSheet(name, color) {
   var _ss = SpreadsheetApp.getActiveSpreadsheet();
-  return _ss.insertSheet(name).setTabColor(color).setColumnWidth(1, 200).setColumnWidth(3, 150).activate();
+  return _ss.insertSheet(name).setTabColor(color).setColumnWidth(1, 200).activate();
 }
