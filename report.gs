@@ -41,7 +41,7 @@ var REPORT = [
   },
  {
    code: 'claims',
-   name: 'Претензий',
+   name: 'Претензий/\nОтработано',
    manual: false
  },
  {
@@ -72,6 +72,11 @@ var REPORT = [
   {
     code: 'lies',
     name: 'Вранья',
+    manual: true
+  },
+  {
+    code: 'points_written_off',
+    name: 'Баллов\nсписано по\nпретензиям',
     manual: true
   }
 ];
@@ -227,6 +232,7 @@ function getWrittenTime(user, i, userType) {
 function getCountTotalTasks(user, i, userType) {
   var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
   var res = APIRequest('issues', {query: [
+    {key: 'tracker_id', value: '!5'},
     {key: 'assigned_to_id', value: user.id},
     {key: 'status_id', value: '*'},
     {key: 'created_on', value: date}
@@ -237,6 +243,7 @@ function getCountTotalTasks(user, i, userType) {
 function getCountDoneTasks(user, userIndex, userType) {
   var filterDate = (userType === 'attendants') ? formatDate(OPTIONS.attendantsStartDate[userIndex]) : formatDate(OPTIONS.currentDate);
   var res = APIRequest('issues', {query: [
+    {key: 'tracker_id', value: '!5'},
     {key: 'assigned_to_id', value: user.id},
     {key: 'status_id', value: '*'},
     {key: 'created_on', value: '<=' + filterDate},
@@ -406,13 +413,21 @@ function getUnsubscribed(user, i, userType) {
 
 function getClaims(user, i, userType) {
   var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  var res = APIRequest('issues', {query: [
+  var allClaims = APIRequest('issues', {query: [
     {key: 'tracker_id', value: 5},
     {key: 'assigned_to_id', value: user.id},
     {key: 'status_id', value: '*'},
     {key: 'created_on', value: date}
   ]});
-  return res.issues;
+
+  var closedClaims = APIRequest('issues', {query: [
+    {key: 'tracker_id', value: 5},
+    {key: 'assigned_to_id', value: user.id},
+    {key: 'status_id', value: 'closed'},
+    {key: 'created_on', value: date}
+  ]});
+
+  return [allClaims.issues, closedClaims.issues];
 }
 
 function getClientRatingAverage(user, i, userType) {
