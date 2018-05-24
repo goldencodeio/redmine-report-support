@@ -31,12 +31,12 @@ var REPORT = [
  },
  {
    code: 'paid_separately',
-   name: 'Оплачивается\nотдельно',
+   name: 'Оплачивается\nотдельно/\nОценено',
    manual: false
  },
   {
     code: 'unsubscribed',
-    name: 'Неотписано',
+    name: 'Неотписано/\nОценено',
     manual: false
   },
  {
@@ -81,6 +81,7 @@ function processReports() {
   var sheet = ss.getActiveSheet();
   var rowI = 2;
   var columnI = 2;
+  var doneIssues = [];
   OPTIONS.performers = OPTIONS.performers.map(function(user, userIndex) {
     user.reports = {};
 
@@ -90,10 +91,17 @@ function processReports() {
         user.reports[report] = reportValue;
         if ((Array.isArray(reportValue))) {
           var listUrl = '';
-          reportValue.forEach(function(task) {
-            listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
-          });
-          sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
+          if ((Array.isArray(reportValue[0]))) {
+            reportValue[0].forEach(function(task) {
+              listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
+            });
+            sheet.getRange(rowI, columnI++).setValue(reportValue[0].length + ' / '+ reportValue[1].length).setNote(listUrl);
+          } else {
+            reportValue.forEach(function(task) {
+              listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
+            });
+            sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
+          }
         } else {
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
@@ -118,10 +126,17 @@ function processReports() {
         user.reports[report] = reportValue;
         if ((Array.isArray(reportValue))) {
           var listUrl = '';
-          reportValue.forEach(function(task) {
-            listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
-          });
-          sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
+          if ((Array.isArray(reportValue[0]))) {
+            reportValue[0].forEach(function(task) {
+              listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
+            });
+            sheet.getRange(rowI, columnI++).setValue(reportValue[0].length + ' / '+ reportValue[1].length).setNote(listUrl);
+          } else {
+            reportValue.forEach(function(task) {
+              listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
+            });
+            sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
+          }
         } else {
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
@@ -191,9 +206,10 @@ function getWorkTime(i, userType) {
 }
 
 function getWrittenTime(user, i, userType) {
+  var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
   var res = APIRequest('time_entries', {query: [
     {key: 'user_id', value: user.id},
-    {key: 'spent_on', value: formatDate(OPTIONS.currentDate)}
+    {key: 'spent_on', value: date}
   ]});
 
   var timeEntries = res.time_entries.reduce(function(a, c) {
@@ -202,10 +218,10 @@ function getWrittenTime(user, i, userType) {
 
   if (userType === 'performers')
     if (!OPTIONS.performersWorkHours[i]) return 0;
-    return (100 / parseInt(OPTIONS.performersWorkHours[i], 10) * timeEntries);
+    return Math.floor(100 / parseInt(OPTIONS.performersWorkHours[i], 10) * timeEntries);
 
   if (userType === 'attendants')
-    return (100 / getHoursByRange(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) * timeEntries);
+    return Math.floor(100 / getHoursByRange(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) * timeEntries);
 }
 
 function getCountTotalTasks(user, i, userType) {
@@ -219,13 +235,6 @@ function getCountTotalTasks(user, i, userType) {
 }
 
 function getCountDoneTasks(user, userIndex, userType) {
-  // if (userType === 'attendants') {
-  //     var filterStartDate = formatDate(OPTIONS.attendantsStartDate[userIndex]);
-  //     var filterFinalDate = formatDate(OPTIONS.attendantsFinalDate[userIndex]);
-  // } else {
-  //     var filterStartDate = formatDate(OPTIONS.currentDate);
-  //     var filterFinalDate = formatDate(OPTIONS.currentDate);
-  // }
   var filterDate = (userType === 'attendants') ? formatDate(OPTIONS.attendantsStartDate[userIndex]) : formatDate(OPTIONS.currentDate);
   var res = APIRequest('issues', {query: [
     {key: 'assigned_to_id', value: user.id},
@@ -275,78 +284,124 @@ function getCountDoneTasks(user, userIndex, userType) {
     // });
     return false;
   });
-  return filteredIssues;
+
+  doneIssues = filteredIssues;
+
+  var filteredIssuesWithRate = filteredIssues.filter(function(item) {
+    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
+      return true;
+  });
+  return [filteredIssues, filteredIssuesWithRate];
 }
 
 function getCountCriticalTasks(user, i, userType) {
-  var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  var res = APIRequest('issues', {query: [
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: date},
-    {key: 'priority_id', value: '5'}
-  ]});
+  // var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
+  // var res = APIRequest('issues', {query: [
+  //   {key: 'assigned_to_id', value: user.id},
+  //   {key: 'status_id', value: 'closed'},
+  //   {key: 'closed_on', value: date},
+  //   {key: 'priority_id', value: '5'}
+  // ]});
+  //
+  // var res1 = APIRequest('issues', {query: [
+  //   {key: 'assigned_to_id', value: user.id},
+  //   {key: 'status_id', value: 'closed'},
+  //   {key: 'closed_on', value: date},
+  //   {key: 'priority_id', value: '4'}
+  // ]});
 
-  var res1 = APIRequest('issues', {query: [
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: date},
-    {key: 'priority_id', value: '4'}
-  ]});
+  var criticalTasks = doneIssues.filter(function(item) {
+    if (item.priority.id > 3) return true;
+  });
 
-  res.issues.concat(res1.issues);
-  return res.issues;
+  var criticalTasksWithRate = criticalTasks.filter(function(item) {
+    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
+      return true;
+  });
+
+  return [criticalTasks, criticalTasksWithRate];
 }
 
 function getOverdueTasks(user, i, userType) {
-  if (userType === 'attendants') {
-      var date = getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]);
-  } else {
-      var prevDate = new Date(OPTIONS.currentDate.getTime());
-      prevDate.setDate(prevDate.getDate() - 1);
-      var date = '<=' + formatDate(prevDate);
-  }
+  // if (userType === 'attendants') {
+  //     var date = getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]);
+  // } else {
+  //     var prevDate = new Date(OPTIONS.currentDate.getTime());
+  //     prevDate.setDate(prevDate.getDate() - 1);
+  //     var date = '<=' + formatDate(prevDate);
+  // }
 
-  var res = APIRequest('issues', {query: [
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: formatDate(OPTIONS.currentDate)},
-    {key: 'due_date', value: date}
-  ]});
+  // var res = APIRequest('issues', {query: [
+  //   {key: 'assigned_to_id', value: user.id},
+  //   {key: 'status_id', value: 'closed'},
+  //   {key: 'closed_on', value: formatDate(OPTIONS.currentDate)},
+  //   {key: 'due_date', value: date}
+  // ]});
 
-  return res.issues;
+  // return res.issues;
 
-  // return res.issues.reduce(function(a, c) {
-  //   if (c.due_date && (Date.parse(c.due_date) + 1000 * 60 * 60 * 24) < OPTIONS.currentDate.getTime()) return a + 1;
-  //   else return a
-  // }, 0);
+  var overdueTasks = doneIssues.filter(function(item) {
+    if (userType === 'attendants') {
+      if (item.due_date && (Date.parse(item.due_date) + 1000 * 60 * 60 * 24) < OPTIONS.attendantsFinalDate[i].getTime())
+        return true;
+    } else {
+      if (item.due_date && (Date.parse(item.due_date) + 1000 * 60 * 60 * 24) < OPTIONS.currentDate.getTime())
+        return true;
+    }
+  });
+
+  var overdueTasksWithRate = overdueTasks.filter(function(item) {
+    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
+      return true;
+  });
+
+  return [overdueTasks, overdueTasksWithRate];
 }
 
 function getPaidSeparatelyTasks(user, i, userType) {
-  var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  var res = APIRequest('issues', {query: [
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: date},
-    {key: 'cf_24', value: 'Единовременная услуга (К оплате)'}
-  ]});
+  // var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
+  // var res = APIRequest('issues', {query: [
+  //   {key: 'assigned_to_id', value: user.id},
+  //   {key: 'status_id', value: 'closed'},
+  //   {key: 'closed_on', value: date},
+  //   {key: 'cf_24', value: 'Единовременная услуга (К оплате)'}
+  // ]});
+  //
+  // return res.issues;
 
-  return res.issues;
+  var paidSeparatelyTasks = doneIssues.filter(function(item) {
+    var tariff = item.custom_fields.find(function(i) {return i.id === 24});
+    if (tariff && tariff.value === 'Единовременная услуга (К оплате)') return true;
+  });
+
+  var paidSeparatelyTasksWithRate = paidSeparatelyTasks.filter(function(item) {
+    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
+      return true;
+  });
+
+  return [paidSeparatelyTasks, paidSeparatelyTasksWithRate];
 }
 
 function getUnsubscribed(user, i, userType) {
-  var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  var res = APIRequest('issues', {query: [
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: date},
-    {key: 'cf_1', value: '1'}
-  ]});
-  var unsubscribed = res.issues.filter(function(item) {
+  // var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
+  // var res = APIRequest('issues', {query: [
+  //   {key: 'assigned_to_id', value: user.id},
+  //   {key: 'status_id', value: 'closed'},
+  //   {key: 'closed_on', value: date},
+  //   {key: 'cf_1', value: '1'}
+  // ]});
+
+  var unsubscribed = doneIssues.filter(function(item) {
     if (item.custom_fields.find(function(i) {return i.id === 1}).value === '')
       return true;
   });
-  return unsubscribed;
+
+  var unsubscribedWithRate = unsubscribed.filter(function(item) {
+    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
+      return true;
+  });
+
+  return [unsubscribed, unsubscribedWithRate];
 }
 
 function getClaims(user, i, userType) {
@@ -361,29 +416,41 @@ function getClaims(user, i, userType) {
 }
 
 function getClientRatingAverage(user, i, userType) {
-  var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  var res = APIRequest('issues', {query: [
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: date},
-    {key: 'cf_7', value: '*'}
-  ]});
-  var sum = res.issues.reduce(function(a, c) {
+  // var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
+  // var res = APIRequest('issues', {query: [
+  //   {key: 'assigned_to_id', value: user.id},
+  //   {key: 'status_id', value: 'closed'},
+  //   {key: 'closed_on', value: date},
+  //   {key: 'cf_7', value: '*'}
+  // ]});
+
+  var doneIssuesWithRate = doneIssues.filter(function(item) {
+    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
+      return true;
+  });
+
+  var sum = doneIssuesWithRate.reduce(function(a, c) {
     return a + parseInt(c.custom_fields.find(function(i) {return i.id === 7}).value, 10);
   }, 0);
-  return res.issues.length ? sum / res.issues.length : 0;
+  return doneIssuesWithRate.length ? sum / doneIssuesWithRate.length : 0;
 }
 
 function getBossRatingAverage(user, i, userType) {
-  var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  var res = APIRequest('issues', {query: [
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'closed_on', value: date},
-    {key: 'cf_8', value: '*'}
-  ]});
-  var sum = res.issues.reduce(function(a, c) {
+  // var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
+  // var res = APIRequest('issues', {query: [
+  //   {key: 'assigned_to_id', value: user.id},
+  //   {key: 'status_id', value: 'closed'},
+  //   {key: 'closed_on', value: date},
+  //   {key: 'cf_8', value: '*'}
+  // ]});
+
+  var doneIssuesWithRate = doneIssues.filter(function(item) {
+    if (item.custom_fields.find(function(i) {return i.id === 8}).value !== '')
+      return true;
+  });
+
+  var sum = doneIssuesWithRate.reduce(function(a, c) {
     return a + parseInt(c.custom_fields.find(function(i) {return i.id === 8}).value, 10);
   }, 0);
-  return res.issues.length ? sum / res.issues.length : 0;
+  return doneIssuesWithRate.length ? sum / doneIssuesWithRate.length : 0;
 }

@@ -64,7 +64,10 @@ function getOptionsData() {
   var data = optionsSheet.getRange(1, 1, optionsSheet.getLastRow(), optionsSheet.getLastColumn()).getValues();
   data.forEach(function(row) {
     var key = row.shift();
-    row = row.filter(function(a) {return a});
+    row = row.filter(function(a) {
+      if (a === 0) return true;
+      return a
+    });
     OPTIONS[key] = row.length > 1 ? row : row[0];
   });
 
