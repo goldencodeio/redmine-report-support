@@ -87,27 +87,36 @@ function processReports() {
   var rowI = 2;
   var columnI = 2;
   var doneIssues = [];
+  var totalReports = [];
   OPTIONS.performers = OPTIONS.performers.map(function(user, userIndex) {
     user.reports = {};
 
-    REPORT.forEach(function(report) {
+    REPORT.forEach(function(report, reportIndex) {
       if (!report.manual) {
         var reportValue = getUserReport(report.code, user, userIndex, 'performers');
         user.reports[report] = reportValue;
         if ((Array.isArray(reportValue))) {
+          if (totalReports[reportIndex] === undefined) totalReports[reportIndex] = [];
           var listUrl = '';
           if ((Array.isArray(reportValue[0]))) {
+            if (totalReports[reportIndex][0] === undefined) totalReports[reportIndex][0] = [];
+            if (totalReports[reportIndex][1] === undefined) totalReports[reportIndex][1] = [];
+            totalReports[reportIndex][0] = totalReports[reportIndex][0].concat(reportValue[0]);
+            totalReports[reportIndex][1] = totalReports[reportIndex][1].concat(reportValue[1]);
             reportValue[0].forEach(function(task) {
               listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
             });
             sheet.getRange(rowI, columnI++).setValue(reportValue[0].length + ' / '+ reportValue[1].length).setNote(listUrl);
           } else {
+            totalReports[reportIndex] = totalReports[reportIndex].concat(reportValue);
             reportValue.forEach(function(task) {
               listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
             });
             sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
           }
         } else {
+          if (totalReports[reportIndex] === undefined) totalReports[reportIndex] = 0;
+          totalReports[reportIndex] += reportValue;
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
@@ -125,24 +134,32 @@ function processReports() {
   OPTIONS.attendants = OPTIONS.attendants.map(function(user, userIndex) {
     user.reports = {};
 
-    REPORT.forEach(function(report) {
+    REPORT.forEach(function(report, reportIndex) {
       if (!report.manual) {
         var reportValue = getUserReport(report.code, user, userIndex, 'attendants');
         user.reports[report] = reportValue;
         if ((Array.isArray(reportValue))) {
+          if (totalReports[reportIndex] === undefined) totalReports[reportIndex] = [];
           var listUrl = '';
           if ((Array.isArray(reportValue[0]))) {
+            if (totalReports[reportIndex][0] === undefined) totalReports[reportIndex][0] = [];
+            if (totalReports[reportIndex][1] === undefined) totalReports[reportIndex][1] = [];
+            totalReports[reportIndex][0] = totalReports[reportIndex][0].concat(reportValue[0]);
+            totalReports[reportIndex][1] = totalReports[reportIndex][1].concat(reportValue[1]);
             reportValue[0].forEach(function(task) {
               listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
             });
             sheet.getRange(rowI, columnI++).setValue(reportValue[0].length + ' / '+ reportValue[1].length).setNote(listUrl);
           } else {
+            totalReports[reportIndex] = totalReports[reportIndex].concat(reportValue);
             reportValue.forEach(function(task) {
               listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
             });
             sheet.getRange(rowI, columnI++).setValue(reportValue.length).setNote(listUrl);
           }
         } else {
+          if (totalReports[reportIndex] === undefined) totalReports[reportIndex] = 0;
+          totalReports[reportIndex] += reportValue;
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
@@ -153,6 +170,29 @@ function processReports() {
     columnI = 2;
     rowI++;
     return user;
+  });
+
+  rowI += 2;
+
+  totalReports.forEach(function(value, i) {
+    if (i === 0 || i === 9 || i === 10) return ++columnI;
+
+    if ((Array.isArray(value))) {
+      var listUrl = '';
+      if ((Array.isArray(value[0]))) {
+        value[0].forEach(function(task) {
+          listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
+        });
+        sheet.getRange(rowI, columnI++).setValue(value[0].length + ' / '+ value[1].length).setNote(listUrl);
+      } else {
+        value.forEach(function(task) {
+          listUrl += 'http://redmine.zolotoykod.ru/issues/' + task.id + '\n';
+        });
+        sheet.getRange(rowI, columnI++).setValue(value.length).setNote(listUrl);
+      }
+    } else {
+      sheet.getRange(rowI, columnI++).setValue(Math.floor(value / (OPTIONS.performers.length + OPTIONS.attendants.length)));
+    }
   });
 }
 
@@ -221,9 +261,10 @@ function getWrittenTime(user, i, userType) {
     return a + c.hours;
   }, 0);
 
-  if (userType === 'performers')
+  if (userType === 'performers') {
     if (!OPTIONS.performersWorkHours[i]) return 0;
     return Math.floor(100 / parseInt(OPTIONS.performersWorkHours[i], 10) * timeEntries);
+  }
 
   if (userType === 'attendants')
     return Math.floor(100 / getHoursByRange(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) * timeEntries);
@@ -249,7 +290,7 @@ function getCountDoneTasks(user, userIndex, userType) {
     {key: 'created_on', value: '<=' + filterDate},
     {key: 'updated_on', value: '>=' + filterDate}
   ]});
-  Logger.log(res.issues.length);
+  // Logger.log(res.issues.length);
   var filteredIssues = res.issues.filter(function(task) {
     var resDetail = APIRequestIssueById(task.id, {query: [
       {key: 'include', value: 'journals'}
@@ -413,21 +454,24 @@ function getUnsubscribed(user, i, userType) {
 
 function getClaims(user, i, userType) {
   var date = (userType === 'attendants') ? getDateRangeWithTime(OPTIONS.attendantsStartDate[i], OPTIONS.attendantsFinalDate[i]) : formatDate(OPTIONS.currentDate);
-  var allClaims = APIRequest('issues', {query: [
+  var res = APIRequest('issues', {query: [
     {key: 'tracker_id', value: 5},
-    {key: 'assigned_to_id', value: user.id},
     {key: 'status_id', value: '*'},
     {key: 'created_on', value: date}
   ]});
 
-  var closedClaims = APIRequest('issues', {query: [
-    {key: 'tracker_id', value: 5},
-    {key: 'assigned_to_id', value: user.id},
-    {key: 'status_id', value: 'closed'},
-    {key: 'created_on', value: date}
-  ]});
+  var allClaims = res.issues.filter(function(item) {
+    var responsibles = item.custom_fields.find(function(i) {return i.id === 40}).value;
+    for (var i = 0; i < responsibles.length; i++) {
+      if (parseInt(responsibles[i], 10) === user.id) return true;
+    }
+  });
 
-  return [allClaims.issues, closedClaims.issues];
+  var closedClaims = allClaims.filter(function(item) {
+    return item.status.id === 5;
+  });
+
+  return [allClaims, closedClaims];
 }
 
 function getClientRatingAverage(user, i, userType) {
