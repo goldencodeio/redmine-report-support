@@ -19,12 +19,12 @@ function processPeriodReports() {
       var data = sheet.getRange(2, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues();
       data.forEach(function(row) {
         var login = row.shift();
+        if (typeof(login) !== 'string') return;
         login = login.match(/\d{4}/);
         if (!login) return;
         login = login[0];
 
         OPTIONS.performers.forEach(function(user, iUser) {
-          // Browser.msgBox(user + ' | ' + login);
           if (user == login){
             if (performers[iUser] === undefined) performers[iUser] = [];
             performers[iUser].push(row);
@@ -46,14 +46,26 @@ function processPeriodReports() {
       arrSum.push(0);
     }
 
+    var countClientRating = 0;
+    var countBossRating = 0;
+
     arrSum.forEach(function(sum, i) {
       user.forEach(function(row) {
+        if (typeof(row[i]) === 'string' && /\//.test(row[i])) {
+          if (arrSum[i] === 0) arrSum[i] = '0 / 0';
+          arrSum[i] = arrSum[i].split('/');
+          row[i] = row[i].split('/');
+          arrSum[i] = (parseInt(arrSum[i][0], 10) + parseInt(row[i][0], 10)) + ' / ' + (parseInt(arrSum[i][1], 10) + parseInt(row[i][1], 10));
+        } else {
+          if (i === 9 && parseFloat(row[i]) !== 0) countClientRating++;
+          if (i === 10 && parseFloat(row[i]) !== 0) countBossRating++;
           arrSum[i] += parseFloat(row[i]);
+        }
       });
     });
-    arrSum[1] = arrSum[1] / user.length;
-    arrSum[9] = arrSum[9] / user.length;
-    arrSum[10] = arrSum[10] / user.length;
+    arrSum[1] = Math.floor(arrSum[1] / user.length);
+    arrSum[9] = countClientRating ? arrSum[9] / countClientRating : 0;
+    arrSum[10] = countBossRating ? arrSum[10] / countBossRating : 0;
     return arrSum;
   });
 
@@ -63,14 +75,26 @@ function processPeriodReports() {
       arrSum.push(0);
     }
 
+    var countClientRating = 0;
+    var countBossRating = 0;
+
     arrSum.forEach(function(sum, i) {
       user.forEach(function(row) {
+        if (typeof(row[i]) === 'string' && /\//.test(row[i])) {
+          if (arrSum[i] === 0) arrSum[i] = '0 / 0';
+          arrSum[i] = arrSum[i].split('/');
+          row[i] = row[i].split('/');
+          arrSum[i] = (parseInt(arrSum[i][0], 10) + parseInt(row[i][0], 10)) + ' / ' + (parseInt(arrSum[i][1], 10) + parseInt(row[i][1], 10));
+        } else {
+          if (i === 9 && parseFloat(row[i]) !== 0) countClientRating++;
+          if (i === 10 && parseFloat(row[i]) !== 0) countBossRating++;
           arrSum[i] += parseFloat(row[i]);
+        }
       });
     });
-    arrSum[1] = arrSum[1] / user.length;
-    arrSum[9] = arrSum[9] / user.length;
-    arrSum[10] = arrSum[10] / user.length;
+    arrSum[1] = Math.floor(arrSum[1] / user.length);
+    arrSum[9] = countClientRating ? arrSum[9] / countClientRating : 0;
+    arrSum[10] = countBossRating ? arrSum[10] / countBossRating : 0;
     return arrSum;
   });
 
