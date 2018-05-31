@@ -341,8 +341,8 @@ function getCountDoneTasks(user, userIndex, userType) {
   doneIssues = filteredIssues;
 
   var filteredIssuesWithRate = filteredIssues.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
   return [filteredIssues, filteredIssuesWithRate];
 }
@@ -368,8 +368,8 @@ function getCountCriticalTasks(user, i, userType) {
   });
 
   var criticalTasksWithRate = criticalTasks.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
 
   return [criticalTasks, criticalTasksWithRate];
@@ -404,8 +404,8 @@ function getOverdueTasks(user, i, userType) {
   });
 
   var overdueTasksWithRate = overdueTasks.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
 
   return [overdueTasks, overdueTasksWithRate];
@@ -423,13 +423,15 @@ function getPaidSeparatelyTasks(user, i, userType) {
   // return res.issues;
 
   var paidSeparatelyTasks = doneIssues.filter(function(item) {
-    var tariff = item.custom_fields.find(function(i) {return i.id === 24});
+    var tariff = item.custom_fields.find(function(i) {
+      return i.id === 24 || i.id === 25 || i.id === 26;
+    });
     if (tariff && tariff.value === 'Единовременная услуга (К оплате)') return true;
   });
 
   var paidSeparatelyTasksWithRate = paidSeparatelyTasks.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
 
   return [paidSeparatelyTasks, paidSeparatelyTasksWithRate];
@@ -445,13 +447,13 @@ function getUnsubscribed(user, i, userType) {
   // ]});
 
   var unsubscribed = doneIssues.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 1}).value === '')
-      return true;
+    var result = item.custom_fields.find(function(i) {return i.id === 1});
+    if (result && result.value === '') return true;
   });
 
   var unsubscribedWithRate = unsubscribed.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
 
   return [unsubscribed, unsubscribedWithRate];
@@ -489,8 +491,8 @@ function getClientRatingAverage(user, i, userType) {
   // ]});
 
   var doneIssuesWithRate = doneIssues.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 7}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 7});
+    if (rate && rate.value !== '') return true;
   });
 
   var sum = doneIssuesWithRate.reduce(function(a, c) {
@@ -509,8 +511,8 @@ function getBossRatingAverage(user, i, userType) {
   // ]});
 
   var doneIssuesWithRate = doneIssues.filter(function(item) {
-    if (item.custom_fields.find(function(i) {return i.id === 8}).value !== '')
-      return true;
+    var rate = item.custom_fields.find(function(i) {return i.id === 8});
+    if (rate && rate.value !== '') return true;
   });
 
   var sum = doneIssuesWithRate.reduce(function(a, c) {
