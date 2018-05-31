@@ -398,7 +398,7 @@ function getOverdueTasks(user, i, userType) {
       if (item.due_date && (Date.parse(item.due_date) + 1000 * 60 * 60 * 24) < OPTIONS.attendantsFinalDate[i].getTime())
         return true;
     } else {
-      if (item.due_date && (Date.parse(item.due_date) + 1000 * 60 * 60 * 24) < OPTIONS.currentDate.getTime())
+      if (item.due_date && (Date.parse(item.due_date) + 1000 * 60 * 60 * 24) <= OPTIONS.currentDate.getTime())
         return true;
     }
   });

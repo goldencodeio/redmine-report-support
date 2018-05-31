@@ -48,6 +48,7 @@ function processPeriodReports() {
 
     var countClientRating = 0;
     var countBossRating = 0;
+    var countWrittenTime = 0;
 
     arrSum.forEach(function(sum, i) {
       user.forEach(function(row) {
@@ -57,13 +58,14 @@ function processPeriodReports() {
           row[i] = row[i].split('/');
           arrSum[i] = (parseInt(arrSum[i][0], 10) + parseInt(row[i][0], 10)) + ' / ' + (parseInt(arrSum[i][1], 10) + parseInt(row[i][1], 10));
         } else {
+          if (i === 0 && parseFloat(row[i]) !== 0) countWrittenTime++;
           if (i === 9 && parseFloat(row[i]) !== 0) countClientRating++;
           if (i === 10 && parseFloat(row[i]) !== 0) countBossRating++;
           arrSum[i] += parseFloat(row[i]);
         }
       });
     });
-    arrSum[1] = Math.floor(arrSum[1] / user.length);
+    arrSum[1] = countWrittenTime ? Math.floor(arrSum[1] / countWrittenTime) : 0;
     arrSum[9] = countClientRating ? arrSum[9] / countClientRating : 0;
     arrSum[10] = countBossRating ? arrSum[10] / countBossRating : 0;
     return arrSum;
@@ -77,6 +79,7 @@ function processPeriodReports() {
 
     var countClientRating = 0;
     var countBossRating = 0;
+    var countWrittenTime = 0;
 
     arrSum.forEach(function(sum, i) {
       user.forEach(function(row) {
@@ -86,13 +89,14 @@ function processPeriodReports() {
           row[i] = row[i].split('/');
           arrSum[i] = (parseInt(arrSum[i][0], 10) + parseInt(row[i][0], 10)) + ' / ' + (parseInt(arrSum[i][1], 10) + parseInt(row[i][1], 10));
         } else {
+          if (i === 0 && parseFloat(row[i]) !== 0) countWrittenTime++;
           if (i === 9 && parseFloat(row[i]) !== 0) countClientRating++;
           if (i === 10 && parseFloat(row[i]) !== 0) countBossRating++;
           arrSum[i] += parseFloat(row[i]);
         }
       });
     });
-    arrSum[1] = Math.floor(arrSum[1] / user.length);
+    arrSum[1] = countWrittenTime ? Math.floor(arrSum[1] / countWrittenTime) : 0;
     arrSum[9] = countClientRating ? arrSum[9] / countClientRating : 0;
     arrSum[10] = countBossRating ? arrSum[10] / countBossRating : 0;
     return arrSum;
