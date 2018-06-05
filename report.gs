@@ -121,6 +121,7 @@ function processReports() {
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
+        if (parseInt(OPTIONS.performersWorkHours[userIndex], 10) === 0) sheet.getRange(rowI, columnI).setValue(0);
         ss.setNamedRange('manualRange' + rowI + columnI, sheet.getRange(sheet.getRange(rowI, columnI++).getA1Notation()));
       }
     });
@@ -204,7 +205,7 @@ function processReports() {
     }
   });
 
-  columnI++
+  columnI++;
   var colTotalDelays = sheet.getRange(rowI, columnI).getA1Notation().substr(0, 1);
   sheet.getRange(rowI, columnI++).setFormula('=SUM('+ colTotalDelays + '2:' + colTotalDelays + (rowI - 1) + ')');
 

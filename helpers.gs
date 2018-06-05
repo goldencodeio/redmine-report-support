@@ -13,7 +13,7 @@ function getDateRangeWithTime(startDate, finalDate) {
 }
 
 function getHoursByRange(startDate, finalDate) {
-  return (finalDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+  return (finalDate.getTime() - startDate.getTime()) / (1000 * 60 * 60) - 1;
 }
 
 function filterUniqueArray(arr) {
