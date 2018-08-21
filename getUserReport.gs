@@ -363,11 +363,11 @@ function getOvertimeSpent(user, userIndex, userType) {
   if (userType === 'performers') {
     var overTime = (date.getHours() * 60 + date.getMinutes()) - (parseInt(OPTIONS.performersStartHour[userIndex], 10) + 9) * 60;
   } else {
-    if (formatDate(date) === formatDate(new Date())) {
-      var overTime = 0;
-    } else {
+    // if (formatDate(date) === formatDate(new Date())) {
+    //   var overTime = 0;
+    // } else {
       var overTime = (date.getHours() * 60 + date.getMinutes()) - 8 * 60;
-    }
+    // }
   }
 
   return (overTime > 0) ? overTime : 0;
