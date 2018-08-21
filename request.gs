@@ -47,3 +47,24 @@ function APIRequestById(reqUrl, id, options) {
 
   return result;
 }
+
+function APIRequestBitrix(method, options) {
+  var url = 'http://portal.zolotoykod.ru/rest/90/' + OPTIONS.apiKeyBitrix + '/' + method;
+  if (!options) options = {};
+  if (options.query)
+    options.query.forEach(function(item, index) {
+      if (index === 0) return url += '?' + item.key + '=' + item.value;
+      url += '&' + item.key + '=' + item.value;
+    });
+
+
+  var response = UrlFetchApp.fetch(encodeURI(url));
+
+  // catch server errors
+  if (response.getResponseCode() >= 400)
+    throw response.getContentText();
+
+  var result = JSON.parse(response.getContentText());
+
+  return result;
+}
