@@ -1,0 +1,6 @@
+{
+  "timeZone": "Europe/Samara",
+  "dependencies": {
+  },
+  "exceptionLogging": "STACKDRIVER"
+}
