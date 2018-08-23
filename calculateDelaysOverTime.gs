@@ -1,9 +1,12 @@
 function calculateDelaysOverTime() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var todaySheet = ss.getSheetByName(formatDate(new Date()));
-  if (!todaySheet) return;
-  todaySheet.activate();
+  var todaySheet = ss.getSheetByName(formatTodayDate());
+  if (!todaySheet) {
+    createNewSheet(formatTodayDate(), '#6d9eeb');
+    todaySheet = ss.getSheetByName(formatTodayDate());
+  }
   getOptionsData();
+  todaySheet.activate();
 
   OPTIONS.performers = OPTIONS.performers.map(function(user, i) {
     return APIRequestBitrix('user.get', {query: [{key: 'uf_phone_inner', value: user}]}).result[0];
@@ -11,7 +14,7 @@ function calculateDelaysOverTime() {
 
   OPTIONS.attendants = OPTIONS.attendants.map(function(user, i) {
     return APIRequestBitrix('user.get', {query: [{key: 'uf_phone_inner', value: user}]}).result[0];
-  });  
+  });
 
   var rowI = 2;
   var columnI = 14;

@@ -2,6 +2,12 @@ function formatDate(date) {
   return date.toJSON().split('T').shift();
 }
 
+function formatTodayDate() {
+  var date = new Date();
+  date.setHours(date.getHours() - 1 * date.getTimezoneOffset() / 60);  
+  return formatDate(date);
+}
+
 function getDateRage(startDate, finalDate) {
   return '><' + formatDate(startDate) + '|' + formatDate(finalDate);
 }
