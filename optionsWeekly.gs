@@ -3,7 +3,7 @@ var OPTIONS = {};
 function initWeeklyOptions() {
   var _ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  getOptionsData();
+  getOptionsData('weekly');
 
   var sheetName = formatDate(OPTIONS.startDate) + ' : ' + formatDate(OPTIONS.finalDate);
   var existingSheet = _ss.getSheetByName(sheetName);

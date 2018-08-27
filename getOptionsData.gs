@@ -1,6 +1,6 @@
 var OPTIONS = {};
 
-function getOptionsData() {
+function getOptionsData(reportType) {
   var _ss = SpreadsheetApp.getActiveSpreadsheet();
 
   var optionsSheet = _ss.setActiveSheet(getOptionsSheet());
@@ -15,8 +15,23 @@ function getOptionsData() {
     OPTIONS[key] = row.length > 1 ? row : row[0];
   });
 
+  if (reportType) {
+    switch (reportType) {
+      case 'weekly':
+        OPTIONS.startDate = OPTIONS.startDateWeekly;
+        OPTIONS.finalDate = OPTIONS.finalDateWeekly;
+        break;
+
+      case 'monthly':
+        OPTIONS.startDate = OPTIONS.startDateMonthly;
+        OPTIONS.finalDate = OPTIONS.finalDateMonthly;
+        break;
+    }
+
+    OPTIONS.finalDate.setHours(OPTIONS.finalDate.getHours() - 1 * OPTIONS.finalDate.getTimezoneOffset() / 60);
+  }
+
   OPTIONS.startDate.setHours(OPTIONS.startDate.getHours() - 1 * OPTIONS.startDate.getTimezoneOffset() / 60);
-  OPTIONS.finalDate.setHours(OPTIONS.finalDate.getHours() - 1 * OPTIONS.finalDate.getTimezoneOffset() / 60);
 
   if (!Array.isArray(OPTIONS.performers)) OPTIONS.performers = [OPTIONS.performers];
   if (!Array.isArray(OPTIONS.attendants)) OPTIONS.attendants = [OPTIONS.attendants];

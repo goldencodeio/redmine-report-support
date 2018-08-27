@@ -23,11 +23,27 @@ function onOpen() {
   ]);
 }
 
-function createTrigger() {
+function createTrigger1() {
   ScriptApp.newTrigger('createDailyReport')
       .timeBased()
       .everyHours(1)
       .create();
+}
+
+function createTrigger2() {
+  ScriptApp.newTrigger('createWeeklyReport')
+    .timeBased()
+    .everyDays(1)
+    .atHour(21)
+    .create();
+}
+
+function createTrigger3() {
+  ScriptApp.newTrigger('createMonthlyReport')
+    .timeBased()
+    .everyDays(1)
+    .atHour(22)
+    .create();
 }
 
 function createBitrixTrigger1() {
