@@ -92,15 +92,15 @@ function getCountTotalTasks(user, i, userType) {
 }
 
 function getCountDoneTasks(user, userIndex, userType) {
-  var filterDate = (userType === 'attendants') ? formatDate(OPTIONS.attendantsStartDate[userIndex]) : formatDate(OPTIONS.currentDate);
+  var filterCreatedDate = (userType === 'attendants') ? formatDate(OPTIONS.attendantsFinalDate[userIndex]) : formatDate(OPTIONS.currentDate);
+  var filterUpdatedDate = (userType === 'attendants') ? formatDate(OPTIONS.attendantsStartDate[userIndex]) : formatDate(OPTIONS.currentDate);
   var res = APIRequest('issues', {query: [
     {key: 'tracker_id', value: '!5'},
     {key: 'assigned_to_id', value: user.id},
     {key: 'status_id', value: '*'},
-    {key: 'created_on', value: '<=' + filterDate},
-    {key: 'updated_on', value: '>=' + filterDate}
+    {key: 'created_on', value: '<=' + filterCreatedDate},
+    {key: 'updated_on', value: '>=' + filterUpdatedDate}
   ]});
-  // Logger.log(res.issues.length);
   var filteredIssues = res.issues.filter(function(task) {
     var resDetail = APIRequestById('issues', task.id, {query: [
       {key: 'include', value: 'journals'}
@@ -108,7 +108,11 @@ function getCountDoneTasks(user, userIndex, userType) {
     for (var j = 0; j < resDetail.issue.journals.length; j++) {
       var journal = resDetail.issue.journals[j];
       if (userType === 'attendants') {
-        if (Date.parse(journal.created_on) > OPTIONS.attendantsStartDate[userIndex].getTime() && Date.parse(journal.created_on) < OPTIONS.attendantsFinalDate[userIndex].getTime()) {
+        var attendantsStartDate = new Date(OPTIONS.attendantsStartDate[userIndex].getTime());
+        var attendantsFinalDate = new Date(OPTIONS.attendantsFinalDate[userIndex].getTime());
+        attendantsStartDate.setHours(attendantsStartDate.getHours() + 1 * attendantsStartDate.getTimezoneOffset() / 60);
+        attendantsFinalDate.setHours(attendantsFinalDate.getHours() + 1 * attendantsFinalDate.getTimezoneOffset() / 60);        
+        if (Date.parse(journal.created_on) > attendantsStartDate.getTime() && Date.parse(journal.created_on) < attendantsFinalDate.getTime()) {
           for (var d = 0; d < journal.details.length; d++) {
             var detail = journal.details[d];
             if (detail.name === 'status_id' && detail.new_value === '3') return true;
@@ -124,22 +128,6 @@ function getCountDoneTasks(user, userIndex, userType) {
         }
       }
     }
-    // resDetail.issue.journals.forEach(function(journal) {
-    //   if (userType === 'attendants') {
-    //     if (Date.parse(journal.created_on) > OPTIONS.attendantsStartDate[userIndex].getTime() && Date.parse(journal.created_on) < OPTIONS.attendantsFinalDate[userIndex].getTime()) {
-    //       journal.details.forEach(function(detail) {
-    //         if (detail.name === 'status_id' && detail.new_value === '3') return true;
-    //       });
-    //     }
-    //   } else {
-    //     var journalCreateDate = journal.created_on.split('T').shift();
-    //     if (journalCreateDate === formatDate(OPTIONS.currentDate)) {
-    //       journal.details.forEach(function(detail) {
-    //         if (detail.name === 'status_id' && detail.new_value === '3') return true;
-    //       });
-    //     }
-    //   }
-    // });
     return false;
   });
 
