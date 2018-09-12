@@ -108,11 +108,7 @@ function getCountDoneTasks(user, userIndex, userType) {
     for (var j = 0; j < resDetail.issue.journals.length; j++) {
       var journal = resDetail.issue.journals[j];
       if (userType === 'attendants') {
-        var attendantsStartDate = new Date(OPTIONS.attendantsStartDate[userIndex].getTime());
-        var attendantsFinalDate = new Date(OPTIONS.attendantsFinalDate[userIndex].getTime());
-        attendantsStartDate.setHours(attendantsStartDate.getHours() + 1 * attendantsStartDate.getTimezoneOffset() / 60);
-        attendantsFinalDate.setHours(attendantsFinalDate.getHours() + 1 * attendantsFinalDate.getTimezoneOffset() / 60);        
-        if (Date.parse(journal.created_on) > attendantsStartDate.getTime() && Date.parse(journal.created_on) < attendantsFinalDate.getTime()) {
+        if (Date.parse(journal.created_on) > OPTIONS.attendantsStartDate[userIndex].getTime() && Date.parse(journal.created_on) < OPTIONS.attendantsFinalDate[userIndex].getTime()) {
           for (var d = 0; d < journal.details.length; d++) {
             var detail = journal.details[d];
             if (detail.name === 'status_id' && detail.new_value === '3') return true;
