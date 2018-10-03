@@ -64,6 +64,11 @@ var REPORT = [
     name: 'Опозданий\n(мин)',
     manual: true
   },
+   {
+     code: 'points_delays',
+     name: 'Баллы за\nопоздания',
+     manual: true
+   },
   {
     code: 'overtime_spent',
     name: 'Переработок\n(мин)',
@@ -121,8 +126,9 @@ function processReports() {
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
-        if (parseInt(OPTIONS.performersWorkHours[userIndex], 10) === 0) sheet.getRange(rowI, columnI).setValue(0);
-        ss.setNamedRange('manualRange' + rowI + columnI, sheet.getRange(sheet.getRange(rowI, columnI++).getA1Notation()));
+        if (report.code !== 'delays' && report.code !== 'overtime_spent') sheet.getRange(rowI, columnI).setValue(0);
+        columnI++;
+        // ss.setNamedRange('manualRange' + rowI + columnI, sheet.getRange(sheet.getRange(rowI, columnI++).getA1Notation()));
       }
     });
 
@@ -166,7 +172,9 @@ function processReports() {
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
-        ss.setNamedRange('manualRange' + rowI + columnI, sheet.getRange(sheet.getRange(rowI, columnI++).getA1Notation()));
+        if (report.code !== 'delays' && report.code !== 'overtime_spent') sheet.getRange(rowI, columnI).setValue(0);
+        columnI++;
+        // ss.setNamedRange('manualRange' + rowI + columnI, sheet.getRange(sheet.getRange(rowI, columnI++).getA1Notation()));
       }
     });
 
@@ -208,6 +216,9 @@ function processReports() {
   columnI++;
   var colTotalDelays = sheet.getRange(rowI, columnI).getA1Notation().substr(0, 1);
   sheet.getRange(rowI, columnI++).setFormula('=SUM('+ colTotalDelays + '2:' + colTotalDelays + (rowI - 1) + ')');
+
+  var colTotalPointsDelays = sheet.getRange(rowI, columnI).getA1Notation().substr(0, 1);
+  sheet.getRange(rowI, columnI++).setFormula('=SUM('+ colTotalPointsDelays + '2:' + colTotalPointsDelays + (rowI - 1) + ')');
 
   var colTotalOverTime = sheet.getRange(rowI, columnI).getA1Notation().substr(0, 1);
   sheet.getRange(rowI, columnI++).setFormula('=SUM('+ colTotalOverTime + '2:' + colTotalOverTime + (rowI - 1) + ')');

@@ -23,7 +23,8 @@ function calculateDelaysOverTime() {
     REPORT.forEach(function(report) {
       if (report.code === 'delays' || report.code === 'overtime_spent') {
         var reportValue = getUserReport(report.code, user, userIndex, 'performers');
-        todaySheet.getRange(rowI, columnI++).setValue(reportValue);
+        todaySheet.getRange(rowI, columnI).setValue(reportValue);
+        columnI += 2;
       }
     });
 
@@ -37,7 +38,8 @@ function calculateDelaysOverTime() {
     REPORT.forEach(function(report) {
       if (report.code === 'delays' || report.code === 'overtime_spent') {
         var reportValue = getUserReport(report.code, user, userIndex, 'attendants');
-        todaySheet.getRange(rowI, columnI++).setValue(reportValue);
+        todaySheet.getRange(rowI, columnI).setValue(reportValue);
+        columnI += 2;
       }
     });
 

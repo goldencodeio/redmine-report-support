@@ -12,7 +12,7 @@ function calculateAttendantsOverTime() {
   });
 
   var rowI = 2 + OPTIONS.performers.length + 2;
-  var columnI = 15;  
+  var columnI = 16;
 
   OPTIONS.attendants.forEach(function(user, userIndex) {
     REPORT.forEach(function(report) {
