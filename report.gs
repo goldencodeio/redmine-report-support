@@ -126,7 +126,9 @@ function processReports() {
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
-        if (report.code !== 'delays' && report.code !== 'overtime_spent') sheet.getRange(rowI, columnI).setValue(0);
+        if (report.code !== 'delays' && report.code !== 'overtime_spent' && !sheet.getRange(rowI, columnI).getValue())
+          sheet.getRange(rowI, columnI).setValue(0);
+
         columnI++;
         // ss.setNamedRange('manualRange' + rowI + columnI, sheet.getRange(sheet.getRange(rowI, columnI++).getA1Notation()));
       }
@@ -172,7 +174,9 @@ function processReports() {
           sheet.getRange(rowI, columnI++).setValue(reportValue);
         }
       } else {
-        if (report.code !== 'delays' && report.code !== 'overtime_spent') sheet.getRange(rowI, columnI).setValue(0);
+        if (report.code !== 'delays' && report.code !== 'overtime_spent' && !sheet.getRange(rowI, columnI).getValue())
+          sheet.getRange(rowI, columnI).setValue(0);
+
         columnI++;
         // ss.setNamedRange('manualRange' + rowI + columnI, sheet.getRange(sheet.getRange(rowI, columnI++).getA1Notation()));
       }
